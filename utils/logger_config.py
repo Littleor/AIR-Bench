@@ -49,12 +49,11 @@ def print_category_result(logger: logging.Logger, category: str, stats: dict) ->
             f"[bold]{category:<40}[/bold] | "
             f"[cyan]Total: {stats['total']:>6}[/cyan] | "
             f"[green]Correct: {stats['correct']:>6}[/green] | "
-            f"[yellow]Accuracy: {avg_acc:.4f}[/yellow]"
+            f"[yellow]Accuracy: {avg_acc:.2%}[/yellow]"
         )
 
 
 def print_results_table(logger: logging.Logger, category_stats: dict) -> None:
-
     console = Console()
     table = Table(
         title="Category-wise Results",
@@ -68,12 +67,28 @@ def print_results_table(logger: logging.Logger, category_stats: dict) -> None:
     table.add_column("Correct", justify="right", style="green")
     table.add_column("Accuracy", justify="right", style="yellow")
 
+    total_samples = 0
+    total_correct = 0
+
     for category, stats in category_stats.items():
         if stats["total"] > 0:
             avg_acc = stats["correct"] / stats["total"]
             table.add_row(
-                category, str(stats["total"]), str(stats["correct"]), f"{avg_acc:.4f}"
+                category, str(stats["total"]), str(stats["correct"]), f"{avg_acc:.2%}"
             )
+            total_samples += stats["total"]
+            total_correct += stats["correct"]
+
+    # 添加总计行
+    if total_samples > 0:
+        overall_acc = total_correct / total_samples
+        table.add_row(
+            "[bold]Overall[/bold]",
+            str(total_samples),
+            str(total_correct),
+            f"{overall_acc:.2%}",
+            style="bold"
+        )
 
     console.print(table)
 
@@ -92,12 +107,28 @@ def print_detailed_results(logger: logging.Logger, task_results: List[Dict]) -> 
     table.add_column("Correct", justify="right", style="green")
     table.add_column("Accuracy", justify="right", style="yellow")
 
+    total_samples = 0
+    total_correct = 0
+
     for result in task_results:
         table.add_row(
             result["task_id"],
             str(result["total"]),
             str(result["correct"]),
-            f"{result['acc']:.4f}",
+            f"{result['acc']:.2%}",
+        )
+        total_samples += result["total"]
+        total_correct += result["correct"]
+
+    # 添加总计行
+    if total_samples > 0:
+        overall_acc = total_correct / total_samples
+        table.add_row(
+            "[bold]Overall[/bold]",
+            str(total_samples),
+            str(total_correct),
+            f"{overall_acc:.2%}",
+            style="bold"
         )
 
     console.print(table)
